@@ -13,11 +13,43 @@ var base = this;
 var items = base.getItems();
 var peons = base.getByType('peon');
 var ogres = base.getByType('ogre');
+var shamans = base.getByType('shaman');
+var fangriders = base.getByType('fangrider');
 var targetedItems = [];
 
 // Available items:
 // this.type = "gem"
 // this.type = "gold-coin"
+
+function isEnemyUnitMovingTo(pos)
+{
+    var enemies = base.getByType('peasants');
+    for(var key in enemies)
+    {
+        var enemy = enemies[key];
+        if(enemy.targetPos.x == pos.x && enemy.targetPos.y == pos.y)
+        {
+            return enemy;
+        }
+    }
+    
+    return null;
+}
+
+function willEnemyUnitReachItemFirst(item, peon)
+{
+    var enemy = isEnemyUnitMovingTo(item.pos);
+    
+    if(enemy)
+    {
+        return ( item.distance(peon) > item.distance(enemy) );
+    }
+    else
+    {
+        return false;
+    }
+}
+
 function getHighestPriorityItem(peon)
 {
     var highestPriorityItem = {'priority': 0};
@@ -28,8 +60,9 @@ function getHighestPriorityItem(peon)
         item.priority = item.bountyGold / item.distance(peon);
         // If current priority higher than previous items and item not targeted by other friendly,
         // set current item to highest priority
-        if(item.priority > highestPriorityItem.priority 
-           && !(itemKey in targetedItems))
+        if(item.priority > highestPriorityItem.priority &&
+            !(itemKey in targetedItems) &&
+            !willEnemyUnitReachItemFirst(item, peon))
         {
             highestPriorityItem = item;
             targetedItems[itemKey] = true;
@@ -54,12 +87,24 @@ var type;
 if (peons.length < 3)
     type = 'peon';
 else
-    if (ogre.length < 2)
-    type = 'ogre';
-    
-//    type = 'ogre';
-if (base.gold >= base.buildables[type].goldCost)
+    if (ogres.length < 2)
+        type = 'ogre';
+    else
+        if (shamans.length < 1)
+            type = 'shaman';
+        else
+            if (fangriders.length < 2)
+                type = 'fangrider';
+            else
+                type = 'ogre';
+if (base.buildables[type] && base.gold >= base.buildables[type].goldCost)
+{
     base.build(type);
+}
+else
+{
+    base.say('I can\'t build type: ' + type);
+}
 
 
 // 'peon': Peons gather gold and do not fight.
