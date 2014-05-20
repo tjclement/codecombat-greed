@@ -11,8 +11,9 @@ var base = this;
 // Click on a unit to see its API.
 
 var items = base.getItems();
-
 var peons = base.getByType('peon');
+var ogres = base.getByType('ogre');
+var targetedItems = [];
 
 // Available items:
 // this.type = "gem"
@@ -25,9 +26,13 @@ function getHighestPriorityItem(peon)
     {
         var item = items[itemKey];
         item.priority = item.bountyGold / item.distance(peon);
-        if(item.priority > highestPriorityItem.priority)
+        // If current priority higher than previous items and item not targeted by other friendly,
+        // set current item to highest priority
+        if(item.priority > highestPriorityItem.priority 
+           && !(itemKey in targetedItems))
         {
             highestPriorityItem = item;
+            targetedItems[itemKey] = true;
         }
     }
     
@@ -49,7 +54,10 @@ var type;
 if (peons.length < 3)
     type = 'peon';
 else
+    if (ogre.length < 2)
     type = 'ogre';
+    
+//    type = 'ogre';
 if (base.gold >= base.buildables[type].goldCost)
     base.build(type);
 
