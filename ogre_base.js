@@ -9,11 +9,34 @@ var base = this;
 // You can only command peons, not fighting units.
 // You win by gathering gold more efficiently to make a larger army.
 // Click on a unit to see its API.
+
 var items = base.getItems();
+
 var peons = base.getByType('peon');
+
+// Available items:
+// this.type = "gem"
+// this.type = "gold-coin"
+function getHighestPriorityItem(peon)
+{
+    var highestPriorityItem = {'priority': 0};
+
+    for(var itemKey in items)
+    {
+        var item = items[itemKey];
+        item.priority = item.bountyGold / item.distance(peon);
+        if(item.priority > highestPriorityItem.priority)
+        {
+            highestPriorityItem = item;
+        }
+    }
+    
+    return highestPriorityItem;
+}
+
 for (var peonIndex = 0; peonIndex < peons.length; peonIndex++) {
     var peon = peons[peonIndex];
-    var item = base.getNearest(items);
+    var item = getHighestPriorityItem(peon);
     if (item)
         base.command(peon, 'move', item.pos);
 }
