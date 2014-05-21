@@ -112,13 +112,11 @@ function getHighestPriorityItem(peon)
 var friendlyCollectors = collectors[myRace];
 
 for(var i = 0; i < friendlyCollectors.length; i++){
-
     var collector = friendlyCollectors[i];
     var item = getHighestPriorityItem(collector);
     if (item && item.pos)
         base.command(collector, 'move', item.pos);
         //base.say('Moving collector to (' + item.pos.x + ',' + item.pos.y + ')');
-
 }
 
 /////// 2. Decide which unit to build this frame. ///////
