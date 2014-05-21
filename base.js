@@ -1,6 +1,6 @@
 var base = this;
 
-var myRace = 'ogres';
+var myRace = (base.id == 'Human Base' ? 'humans' : (base.id == 'Ogre Base' ? 'ogres' : 'unknown'));
 var otherRace = (myRace === 'humans' ? 'ogres' : (myRace === 'ogres' ? 'humans' : 'unknown'));
 
 var unitTypes = {
@@ -63,7 +63,8 @@ function isEnemyCollectorMovingTo(pos)
     for(var key in enemyCollectors)
     {
         var enemy = enemyCollectors[key];
-        if(Math.floor(enemy.targetPos.x) == Math.floor(pos.x) &&
+        if(enemy.targetPos && pos &&
+           Math.floor(enemy.targetPos.x) == Math.floor(pos.x) &&
            Math.floor(enemy.targetPos.y) == Math.floor(pos.y))
         {
             return enemy;
