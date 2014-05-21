@@ -59,11 +59,12 @@ var bosses = {};
 
 function isEnemyCollectorMovingTo(pos)
 {
-    var enemyCollectors = base.getByType(collectors[otherRace]);
+    var enemyCollectors = collectors[otherRace];
     for(var key in enemyCollectors)
     {
         var enemy = enemyCollectors[key];
-        if(enemy.targetPos.x == pos.x && enemy.targetPos.y == pos.y)
+        if(Math.floor(enemy.targetPos.x) == Math.floor(pos.x) &&
+           Math.floor(enemy.targetPos.y) == Math.floor(pos.y))
         {
             return enemy;
         }
@@ -86,22 +87,23 @@ function willEnemyUnitReachItemFirst(item, collectorUnit)
     }
 }
 
-function getHighestPriorityItem(peon)
+function getHighestPriorityItem(collector)
 {
     var highestPriorityItem = {'priority': 0};
 
     for(var itemKey in items)
     {
         var item = items[itemKey];
-        item.priority = item.bountyGold / item.distance(peon);
+        item.priority = item.bountyGold / item.distance(collector);
         // If current priority higher than previous items and item not targeted by other friendly,
         // set current item to highest priority
         if(item.priority > highestPriorityItem.priority &&
-            !(itemKey in targetedItems) &&
-            !willEnemyUnitReachItemFirst(item, peon))
+            !(targetedItems[item.id]))
         {
-            highestPriorityItem = item;
-            targetedItems[itemKey] = true;
+            if(!willEnemyUnitReachItemFirst(item, collector) || highestPriorityItem.priority == 0)
+            {
+                highestPriorityItem = item;
+            }
         }
     }
     
@@ -112,11 +114,19 @@ function getHighestPriorityItem(peon)
 var friendlyCollectors = collectors[myRace];
 
 for(var i = 0; i < friendlyCollectors.length; i++){
+
     var collector = friendlyCollectors[i];
+    targetedItems[collector.currentlyTargeting] = null;
+    collector.currentlyTargeting = null;
+
     var item = getHighestPriorityItem(collector);
     if (item && item.pos)
+    {
         base.command(collector, 'move', item.pos);
+        targetedItems[item.id] = true;
+        collector.currentlyTargeting = item.id;
         //base.say('Moving collector to (' + item.pos.x + ',' + item.pos.y + ')');
+    }
 }
 
 /////// 2. Decide which unit to build this frame. ///////
