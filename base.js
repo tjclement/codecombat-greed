@@ -30,31 +30,31 @@ var unitTypes = {
     }
 };
 
-var items = base.getItems();
-var targetedItems = [];
+base.items = base.getItems();
+base.targetedItems = [];
 
-var collectors = {};
-collectors[ourRace] = base.getByType(unitTypes.collector[ourRace]);
-collectors[otherRace] = base.getByType(unitTypes.collector[otherRace]);
-var weaklings = {};
-weaklings[ourRace] = base.getByType(unitTypes.weak[ourRace]);
-weaklings[otherRace] = base.getByType(unitTypes.weak[otherRace]);
-var attackers = {};
-attackers[ourRace] = base.getByType(unitTypes.attacker[ourRace]);
-attackers[otherRace] = base.getByType(unitTypes.attacker[otherRace]);
-var mages = {};
-mages[ourRace] = base.getByType(unitTypes.mage[ourRace]);
-mages[otherRace] = base.getByType(unitTypes.mage[otherRace]);
-var flyings = {};
-flyings[ourRace] = base.getByType(unitTypes.flying[ourRace]);
-flyings[otherRace] = base.getByType(unitTypes.flying[otherRace]);
-var bosses = {};
-bosses[ourRace] = base.getByType(unitTypes.boss[ourRace]);
-bosses[otherRace] = base.getByType(unitTypes.boss[otherRace]);
+base.collectors = {};
+base.collectors[ourRace] = base.getByType(unitTypes.collector[ourRace]);
+base.collectors[otherRace] = base.getByType(unitTypes.collector[otherRace]);
+base.weaklings = {};
+base.weaklings[ourRace] = base.getByType(unitTypes.weak[ourRace]);
+base.weaklings[otherRace] = base.getByType(unitTypes.weak[otherRace]);
+base.attackers = {};
+base.attackers[ourRace] = base.getByType(unitTypes.attacker[ourRace]);
+base.attackers[otherRace] = base.getByType(unitTypes.attacker[otherRace]);
+base.mages = {};
+base.mages[ourRace] = base.getByType(unitTypes.mage[ourRace]);
+base.mages[otherRace] = base.getByType(unitTypes.mage[otherRace]);
+base.flyings = {};
+base.flyings[ourRace] = base.getByType(unitTypes.flying[ourRace]);
+base.flyings[otherRace] = base.getByType(unitTypes.flying[otherRace]);
+base.bosses = {};
+base.bosses[ourRace] = base.getByType(unitTypes.boss[ourRace]);
+base.bosses[otherRace] = base.getByType(unitTypes.boss[otherRace]);
 
-function isEnemyCollectorMovingTo(pos)
+base.isEnemyCollectorMovingTo = function(pos)
 {
-    var enemyCollectors = collectors[otherRace];
+    var enemyCollectors = base.collectors[otherRace];
     for(var key in enemyCollectors)
     {
         if(enemyCollectors.hasOwnProperty(key)){
@@ -67,14 +67,14 @@ function isEnemyCollectorMovingTo(pos)
             }
         }
     }
-    
-    return null;
-}
 
-function willEnemyUnitReachItemFirst(item, collectorUnit)
+    return null;
+};
+
+base.willEnemyUnitReachItemFirst = function(item, collectorUnit)
 {
-    var enemyCollector = isEnemyCollectorMovingTo(item.pos);
-    
+    var enemyCollector = base.isEnemyCollectorMovingTo(item.pos);
+
     if(enemyCollector)
     {
         return ( item.distance(collectorUnit) > item.distance(enemyCollector) );
@@ -83,54 +83,57 @@ function willEnemyUnitReachItemFirst(item, collectorUnit)
     {
         return false;
     }
-}
+};
 
-function getHighestPriorityItem(collector)
+base.getHighestPriorityItem = function(collector)
 {
     var highestPriorityItem = {'priority': 0};
 
-    for(var itemKey in items)
+    for(var itemKey in base.items)
     {
-        if(items.hasOwnProperty(itemKey)){
-            var item = items[itemKey];
+        if(base.items.hasOwnProperty(itemKey)){
+            var item = base.items[itemKey];
             item.priority = item.bountyGold / item.distance(collector);
             // If current priority higher than previous items and item not targeted by other friendly,
             // set current item to highest priority
             if(item.priority > highestPriorityItem.priority &&
-                !(targetedItems[item.id]))
+                (base.targetedItems[item.id] !== true))
             {
-                if(!willEnemyUnitReachItemFirst(item, collector) || highestPriorityItem.priority == 0)
+                if(!base.willEnemyUnitReachItemFirst(item, collector) || highestPriorityItem.priority === 0)
                 {
                     highestPriorityItem = item;
                 }
             }
         }
     }
-    
+
     return highestPriorityItem;
-}
+};
 
-function getTotalEnemyDPS(){
+base.getTotalEnemyDPS = function()
+{
     var total = 0;
-    total += weaklings[otherRace].length * 10;
-    total += attackers[otherRace].length * 16;
-    total += mages[otherRace].length * 10;  /* Real DPS is 6, but correct for OP distance advantage */
-    total += flyings[otherRace].length * 20; /* Real DPS is 15, but correct for OP distance advantage */
-    total += bosses[otherRace].length * 27;
+    total += base.weaklings[otherRace].length * 10;
+    total += base.attackers[otherRace].length * 16;
+    total += base.mages[otherRace].length * 10;  /* Real DPS is 6, but correct for OP distance advantage */
+    total += base.flyings[otherRace].length * 20; /* Real DPS is 15, but correct for OP distance advantage */
+    total += base.bosses[otherRace].length * 27;
     return total;
-}
+};
 
-function getTotalFriendlyDPS(){
+base.getTotalFriendlyDPS = function()
+{
     var total = 0;
-    total += weaklings[ourRace].length * 10;
-    total += attackers[ourRace].length * 16;
-    total += mages[ourRace].length * 10;  /* Real DPS is 6, but correct for OP distance advantage */
-    total += flyings[ourRace].length * 20; /* Real DPS is 15, but correct for OP distance advantage */
-    total += bosses[ourRace].length * 27;
+    total += base.weaklings[ourRace].length * 10;
+    total += base.attackers[ourRace].length * 16;
+    total += base.mages[ourRace].length * 10;  /* Real DPS is 6, but correct for OP distance advantage */
+    total += base.flyings[ourRace].length * 20; /* Real DPS is 15, but correct for OP distance advantage */
+    total += base.bosses[ourRace].length * 27;
     return total;
-}
+};
 
-function getEnemyDistanceToBase(){
+base.getEnemyDistanceToBase = function()
+{
     var minDistance = 9999;
     var enemies = base.getEnemies();
     for(var key in enemies)
@@ -144,22 +147,23 @@ function getEnemyDistanceToBase(){
             }
         }
     }
-}
+    return minDistance;
+};
 
 // Actually send collector units
-var friendlyCollectors = collectors[ourRace];
+var friendlyCollectors = base.collectors[ourRace];
 
 for(var i = 0; i < friendlyCollectors.length; i++){
 
     var collector = friendlyCollectors[i];
-    targetedItems[collector.currentlyTargeting] = null;
+    base.targetedItems[collector.currentlyTargeting] = null;
     collector.currentlyTargeting = null;
 
-    var item = getHighestPriorityItem(collector);
+    var item = base.getHighestPriorityItem(collector);
     if (item && item.pos)
     {
         base.command(collector, 'move', item.pos);
-        targetedItems[item.id] = true;
+        base.targetedItems[item.id] = true;
         collector.currentlyTargeting = item.id;
     }
 }
@@ -170,21 +174,37 @@ for(var i = 0; i < friendlyCollectors.length; i++){
 
 var strategies = {
     goldDigger: {
-        disruptable: true,
-        shouldDisrupt: function(){
+        shouldDisrupt: function(scope){
             return false;
         },
-        execute: function(){
+        initialise: function(scope){
+            var base = scope;
+            base.isCurrentStrategyDisruptable = false;
+        },
+        execute: function(scope){
+            var base = scope;
             var collectorType = unitTypes.collector[ourRace];
-            if(base.gold >= base.buildables[collectorType].goldCost
-                && (/*collectors[ourRace].length < collectors[otherRace].length ||*/ collectors[ourRace].length < 3))
+            if( base.collectors[ourRace].length < base.collectors[otherRace].length || base.collectors[ourRace].length < 3 )
             {
-                base.build(collectorType);
-                base.say("For the gains!");
+                /* Do not allow disruption until we have a good economy */
+                base.isCurrentStrategyDisruptable = false;
+
+                if(base.gold >= base.buildables[collectorType].goldCost)
+                {
+                    base.build(collectorType);
+                    base.say("For the gains!");
+                }
+                else
+                {
+                    /* Starting up our economy */
+                    base.say("Startups are cool!");
+                }
             }
             else
             {
-                base.say("Hoarding! " + friendlyCollectors.length + " " + collectors[otherRace].length);
+                /* If our economy is good, allow disruption */
+                base.isCurrentStrategyDisruptable = true;
+                base.say("Hoarding! " + base.collectors[ourRace].length + " " + base.collectors[otherRace].length);
             }
 
             return false;  /* Select goldDigger again next frame */
@@ -195,28 +215,44 @@ var strategies = {
          * http://discourse.codecombat.com/t/greed-properties-of-object-assigned-to-this-are-read-only/834
          */
         /*begun: false,
-        attackersBuilt: 0,
-        magesBuilt: 0,*/
-        disruptable: false,
-        shouldDisrupt: function(){
-            var enemyDPS = getTotalEnemyDPS();
-            var ourDPS = getTotalFriendlyDPS();
-            var shortestEnemyDistance = getEnemyDistanceToBase();
+         attackersBuilt: 0,
+         magesBuilt: 0,*/
+        shouldDisrupt: function(scope){
+            var base = scope;
+            var enemyDPS = base.getTotalEnemyDPS();
+            var ourDPS = base.getTotalFriendlyDPS();
+            var shortestEnemyDistance = base.getEnemyDistanceToBase();
 
             return (enemyDPS - ourDPS > 20 || shortestEnemyDistance <= 40);
         },
-        execute: function(){
-            var enemyDPS = getTotalEnemyDPS();
+        initialise: function(scope){
+            var base = scope;
+            base.isCurrentStrategyDisruptable = false;
+        },
+        execute: function(scope){
+            var base = scope;
+            var enemyDPS = base.getTotalEnemyDPS();
             var ourUnitDPS = 16;
             var attackersNeeded = enemyDPS / ourUnitDPS + 1;
             var attackerType = unitTypes.attacker[ourRace];
             var mageType = unitTypes.mage[ourRace];
-            var shortestEnemyDistance = getEnemyDistanceToBase();
+            var shortestEnemyDistance = base.getEnemyDistanceToBase();
             var cost = (attackersNeeded * base.buildables[attackerType].goldCost) + base.buildables[mageType].goldCost;
 
-            base.say("Oh no you didn't!");
+            /* Never allow disruption from defensive strategy */
+            base.isCurrentStrategyDisruptable = false;
+            base.say("Oh no you didn't! " + enemyDPS + " " + attackersNeeded + " " + shortestEnemyDistance);
 
-            if( !this.begun && (shortestEnemyDistance > 30) && (base.gold < cost) )
+            if(!this.attackersBuilt)
+            {
+                this.attackersBuilt = 0;
+            }
+            if(!this.magesBuilt)
+            {
+                this.magesBuilt = 0;
+            }
+
+            if( !this.begun && (shortestEnemyDistance > 40) )
             {
                 base.say("nem");
                 return false;
@@ -241,25 +277,28 @@ var strategies = {
                 }
                 return false;
             }
+
+            return true;
         }
     }
 };
 
 /* Set initial strategy, and save state */
-if(!this.currentStrategy)
+if(!base.currentStrategy)
 {
-    this.currentStrategy = strategies.goldDigger;
+    base.currentStrategy = strategies.goldDigger;
 }
 
 /* Strategy override loop */
-if(this.currentStrategy.disruptable)
+if(base.isCurrentStrategyDisruptable)
 {
     for(var key in strategies)
     {
         var strategy = strategies[key];
-        if(strategy.shouldDisrupt()){
-            this.currentStrategy = strategy;
-            if(!this.currentStrategy.disruptable)
+        if(strategy.shouldDisrupt(base)){
+            base.currentStrategy = strategy;
+            base.currentStrategy.initialise(base);
+            if(!base.isCurrentStrategyDisruptable)
             {
                 break;
             }
@@ -268,4 +307,8 @@ if(this.currentStrategy.disruptable)
 }
 
 /* Run current strategy */
-this.currentStrategy.execute();
+if(base.currentStrategy.execute(base))
+{
+    /* If current strategy completed and does not require being called again, switch back to goldDigger */
+    base.currentStrategy = strategies.goldDigger;
+}
